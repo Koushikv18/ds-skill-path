@@ -1,24 +1,85 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowRight, Code2, LineChart, Sparkles, Target, Zap, BookOpen } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  component: Landing,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function Landing() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="min-h-screen" style={{ background: "var(--gradient-hero)" }}>
+      {/* Nav */}
+      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+        <Link to="/" className="flex items-center gap-2">
+          <div className="grid h-8 w-8 place-items-center rounded-lg text-primary-foreground font-bold" style={{ background: "var(--gradient-primary)" }}>
+            DS
+          </div>
+          <span className="font-display text-lg font-semibold">DS Track</span>
+        </Link>
+        <div className="flex items-center gap-2">
+          <Link to="/auth"><Button variant="ghost">Sign in</Button></Link>
+          <Link to="/auth" search={{ mode: "signup" as const }}><Button>Get started</Button></Link>
+        </div>
+      </header>
+
+      {/* Hero */}
+      <section className="mx-auto max-w-4xl px-6 pt-16 pb-24 text-center">
+        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
+          <Sparkles className="h-3.5 w-3.5 text-accent" />
+          A career skill-track for aspiring data scientists
+        </div>
+        <h1 className="font-display text-5xl font-bold leading-[1.05] tracking-tight md:text-6xl">
+          Go from Python basics to <span className="bg-clip-text text-transparent" style={{ backgroundImage: "var(--gradient-primary)" }}>job-ready</span> data scientist by actually building things.
+        </h1>
+        <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
+          Twelve focused modules. Real datasets. A live Python notebook in your browser. DS Track tells you what to do next — every day — until you have portfolio-worthy projects to show.
+        </p>
+        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <Link to="/auth" search={{ mode: "signup" as const }}>
+            <Button size="lg" className="gap-2">Start learning free <ArrowRight className="h-4 w-4" /></Button>
+          </Link>
+          <Link to="/auth"><Button size="lg" variant="outline">I already have an account</Button></Link>
+        </div>
+        <p className="mt-4 text-xs text-muted-foreground">No credit card. Nothing to install. Runs in your browser.</p>
+      </section>
+
+      {/* Features */}
+      <section className="mx-auto max-w-6xl px-6 pb-24">
+        <div className="grid gap-6 md:grid-cols-3">
+          {[
+            { icon: Target, title: "A guided skill tree", body: "3 levels · 12 modules · 3 capstones. Unlock what's next as you progress." },
+            { icon: Code2, title: "A real Python notebook", body: "pandas, NumPy, matplotlib — running live in your browser. No setup." },
+            { icon: LineChart, title: "Real datasets, real tasks", body: "Each module drops you into a realistic problem with data you can actually explore." },
+            { icon: Zap, title: "A daily routine engine", body: "The app tells you what to do next, so you build a habit instead of hunting for tutorials." },
+            { icon: BookOpen, title: "Portfolio-worthy projects", body: "Capstones produce finished notebooks you can show hiring managers." },
+            { icon: Sparkles, title: "Adaptive difficulty", body: "Tasks scale with you — easier when you're stuck, harder when you're flying." },
+          ].map((f) => (
+            <div key={f.title} className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-sm)] transition hover:shadow-[var(--shadow-md)]">
+              <div className="mb-4 grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary">
+                <f.icon className="h-5 w-5" />
+              </div>
+              <h3 className="font-display text-lg font-semibold">{f.title}</h3>
+              <p className="mt-1.5 text-sm text-muted-foreground">{f.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="mx-auto max-w-4xl px-6 pb-24">
+        <div className="rounded-3xl border border-border p-10 text-center shadow-[var(--shadow-glow)]" style={{ background: "var(--gradient-primary)" }}>
+          <h2 className="font-display text-3xl font-bold text-primary-foreground md:text-4xl">Your next data science project starts today.</h2>
+          <p className="mx-auto mt-3 max-w-xl text-primary-foreground/80">Create your free account and unlock Module 1 in under a minute.</p>
+          <Link to="/auth" search={{ mode: "signup" as const }}>
+            <Button size="lg" variant="secondary" className="mt-6 gap-2">Create your account <ArrowRight className="h-4 w-4" /></Button>
+          </Link>
+        </div>
+      </section>
+
+      <footer className="border-t border-border py-8 text-center text-xs text-muted-foreground">
+        © {new Date().getFullYear()} DS Track. Built for people who learn by doing.
+      </footer>
     </div>
   );
 }
