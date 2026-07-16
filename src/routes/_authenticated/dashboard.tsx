@@ -5,6 +5,8 @@ import { AppHeader } from "@/components/AppHeader";
 import { LEVELS, type Module } from "@/lib/modules";
 import { Lock, Sparkles, Play, Trophy, Flame } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { WeeklyTracker } from "@/components/WeeklyTracker";
+import { DailyChecklistCard } from "@/components/DailyChecklistCard";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
@@ -21,6 +23,9 @@ function Dashboard() {
       return data as Module[];
     },
   });
+
+  const nextModule = modules.find((module) => module.id === 1);
+  const nextModuleLabel = nextModule ? `Continue: ${nextModule.title}` : "Continue: Module 1 — Python Fundamentals for Data";
 
   return (
     <div className="min-h-screen bg-background">
@@ -48,6 +53,11 @@ function Dashboard() {
             <Stat icon={Trophy} label="Modules done" value="0 / 12" />
             <Stat icon={Sparkles} label="Level" value="Basic" />
           </div>
+        </div>
+
+        <div className="mb-8 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+          <WeeklyTracker />
+          <DailyChecklistCard userId={user.id} nextModuleLabel={nextModuleLabel} nextModuleId={1} />
         </div>
 
         {/* Skill tree */}
