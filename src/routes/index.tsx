@@ -48,12 +48,12 @@ function Landing() {
       <section className="mx-auto max-w-6xl px-6 pb-24">
         <div className="grid gap-6 md:grid-cols-3">
           {[
-            { icon: Target, title: "A guided skill tree", body: "3 levels · 12 modules · 3 capstones. Unlock what's next as you progress." },
-            { icon: Code2, title: "A real Python notebook", body: "pandas, NumPy, matplotlib — running live in your browser. No setup." },
-            { icon: LineChart, title: "Real datasets, real tasks", body: "Each module drops you into a realistic problem with data you can actually explore." },
-            { icon: Zap, title: "A daily routine engine", body: "The app tells you what to do next, so you build a habit instead of hunting for tutorials." },
-            { icon: BookOpen, title: "Portfolio-worthy projects", body: "Capstones produce finished notebooks you can show hiring managers." },
-            { icon: Sparkles, title: "Adaptive difficulty", body: "Tasks scale with you — easier when you're stuck, harder when you're flying." },
+            { icon: Target, title: "A guided skill tree", body: "3 levels · 12 modules · 3 capstones. Finish a level to unlock the next." },
+            { icon: Zap, title: "A daily routine engine", body: "A checklist and weekly tracker tell you what to do next, so you build a habit instead of hunting for tutorials." },
+            { icon: BookOpen, title: "SQL practice in the browser", body: "Run real queries against sample schemas, right in your browser — no setup." },
+            { icon: Code2, title: "Python notebooks", body: "In-browser notebooks with pandas, NumPy and matplotlib are landing in your dashboard next." },
+            { icon: LineChart, title: "Real datasets, real tasks", body: "Each module hands you a realistic problem with data you can actually explore." },
+            { icon: Sparkles, title: "Portfolio-worthy capstones", body: "Levels end with a capstone brief you can show hiring managers." },
           ].map((f) => (
             <div key={f.title} className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-sm)] transition hover:shadow-[var(--shadow-md)]">
               <div className="mb-4 grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary">

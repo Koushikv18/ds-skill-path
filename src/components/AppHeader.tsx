@@ -1,8 +1,24 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { BookOpen, LogOut, Settings, Sparkles } from "lucide-react";
+import { BookOpen, LogOut, Settings } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+function initials(email?: string | null) {
+  if (!email) return "DS";
+  const name = email.split("@")[0];
+  const parts = name.split(/[._-]/).filter(Boolean);
+  const chars = (parts[0]?.[0] ?? name[0] ?? "D") + (parts[1]?.[0] ?? "");
+  return chars.toUpperCase();
+}
 
 export function AppHeader({ email }: { email?: string | null }) {
   const navigate = useNavigate();
@@ -22,9 +38,33 @@ export function AppHeader({ email }: { email?: string | null }) {
         </Link>
         <div className="flex items-center gap-2">
           <Link to="/sql-practice"><Button variant="ghost" size="sm" className="gap-1.5"><BookOpen className="h-4 w-4" /> SQL Practice</Button></Link>
-          <Link to="/settings"><Button variant="ghost" size="sm" className="gap-1.5"><Settings className="h-4 w-4" /> Settings</Button></Link>
-          {email && <span className="hidden text-sm text-muted-foreground sm:inline">{email}</span>}
-          <Button variant="ghost" size="sm" onClick={signOut} className="gap-1.5"><LogOut className="h-4 w-4" /> Sign out</Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                aria-label="Account menu"
+                className="grid h-9 w-9 place-items-center rounded-full border border-border bg-card text-sm font-semibold text-foreground hover:bg-accent/10 focus:outline-none focus:ring-2 focus:ring-primary/40"
+              >
+                {initials(email)}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              {email && (
+                <>
+                  <DropdownMenuLabel className="truncate text-xs font-normal text-muted-foreground">
+                    {email}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                </>
+              )}
+              <DropdownMenuItem asChild>
+                <Link to="/settings" className="gap-2"><Settings className="h-4 w-4" /> Settings</Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={signOut} className="gap-2 text-destructive focus:text-destructive">
+                <LogOut className="h-4 w-4" /> Sign out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>

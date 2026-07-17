@@ -3,12 +3,21 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AppHeader } from "@/components/AppHeader";
 import { LEVELS, type Module } from "@/lib/modules";
-import { Lock, Sparkles, Play, Trophy, Flame } from "lucide-react";
+import { Lock, Sparkles, Play, Trophy, Flame, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { WeeklyTracker } from "@/components/WeeklyTracker";
 import { DailyChecklistCard } from "@/components/DailyChecklistCard";
 
+type ProgressStatus = "locked" | "unlocked" | "in_progress" | "passed";
+type ProgressRow = { module_id: number; status: ProgressStatus };
+
 export const Route = createFileRoute("/_authenticated/dashboard")({
+  head: () => ({
+    meta: [
+      { title: "Your skill tree · DS Track" },
+      { name: "description", content: "Your personal Data Science skill tree — twelve modules across three levels." },
+    ],
+  }),
   component: Dashboard,
 });
 
@@ -24,43 +33,74 @@ function Dashboard() {
     },
   });
 
-  const nextModule = modules.find((module) => module.id === 1);
-  const nextModuleLabel = nextModule ? `Continue: ${nextModule.title}` : "Continue: Module 1 — Python Fundamentals for Data";
+  const { data: progress = [] } = useQuery({
+    queryKey: ["progress", user.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("user_module_progress")
+        .select("module_id,status")
+        .eq("user_id", user.id);
+      if (error) throw error;
+      return (data ?? []) as ProgressRow[];
+    },
+  });
+
+  const statusById = new Map(progress.map((p) => [p.module_id, p.status]));
+  const passedCount = progress.filter((p) => p.status === "passed").length;
+  const currentLevel = modules.find((m) => statusById.get(m.id) === "unlocked" || statusById.get(m.id) === "in_progress")?.level
+    ?? (passedCount === 12 ? 3 : 1);
+
+  const nextModule = modules.find((m) => {
+    const s = statusById.get(m.id);
+    return s === "unlocked" || s === "in_progress";
+  }) ?? modules.find((m) => statusById.get(m.id) !== "passed");
+
+  const nextModuleLabel = nextModule
+    ? `Continue: ${nextModule.title}`
+    : "You've cleared the skill tree — pick a module to revisit.";
 
   return (
     <div className="min-h-screen bg-background">
       <AppHeader email={user.email} />
 
       <main className="mx-auto max-w-5xl px-6 py-10">
-        {/* Greeting + routine */}
         <div className="mb-10 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-sm)]">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Welcome back</p>
               <h1 className="mt-1 font-display text-3xl font-bold">Let's keep building.</h1>
               <p className="mt-2 max-w-lg text-sm text-muted-foreground">
-                Your next step is <span className="font-medium text-foreground">Module 1 — Python Fundamentals for Data</span>. About 20 minutes.
+                {nextModule ? (
+                  <>Your next step is <span className="font-medium text-foreground">{nextModule.title}</span>. About 20 minutes.</>
+                ) : (
+                  <>All twelve modules complete. Revisit a capstone or head to SQL Practice.</>
+                )}
               </p>
             </div>
-            <Link to="/modules/$id" params={{ id: "1" }}>
-              <div className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-[var(--shadow-glow)] hover:opacity-90">
-                <Play className="h-4 w-4" /> Continue learning
-              </div>
-            </Link>
+            {nextModule && (
+              <Link to="/modules/$id" params={{ id: String(nextModule.id) }}>
+                <div className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-[var(--shadow-glow)] hover:opacity-90">
+                  <Play className="h-4 w-4" /> Continue learning
+                </div>
+              </Link>
+            )}
           </div>
           <div className="mt-6 flex gap-6 text-sm">
             <Stat icon={Flame} label="Day streak" value="0" />
-            <Stat icon={Trophy} label="Modules done" value="0 / 12" />
-            <Stat icon={Sparkles} label="Level" value="Basic" />
+            <Stat icon={Trophy} label="Modules done" value={`${passedCount} / 12`} />
+            <Stat icon={Sparkles} label="Level" value={LEVELS[currentLevel - 1]?.name ?? "Basic"} />
           </div>
         </div>
 
         <div className="mb-8 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
           <WeeklyTracker />
-          <DailyChecklistCard userId={user.id} nextModuleLabel={nextModuleLabel} nextModuleId={1} />
+          <DailyChecklistCard
+            userId={user.id}
+            nextModuleLabel={nextModuleLabel}
+            nextModuleId={nextModule?.id ?? null}
+          />
         </div>
 
-        {/* Skill tree */}
         <div className="mb-2">
           <h2 className="font-display text-2xl font-bold">Your skill tree</h2>
           <p className="mt-1 text-sm text-muted-foreground">Twelve modules across three levels. Finish a level to unlock the next.</p>
@@ -85,12 +125,15 @@ function Dashboard() {
                 </div>
 
                 <div className="relative">
-                  {/* connecting line */}
                   <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-gradient-to-b from-border via-border to-transparent" aria-hidden />
-
                   <div className="space-y-6">
                     {levelModules.map((m, idx) => (
-                      <ModuleNode key={m.id} module={m} unlocked={m.id === 1} side={idx % 2 === 0 ? "left" : "right"} />
+                      <ModuleNode
+                        key={m.id}
+                        module={m}
+                        status={statusById.get(m.id) ?? "locked"}
+                        side={idx % 2 === 0 ? "left" : "right"}
+                      />
                     ))}
                   </div>
                 </div>
@@ -115,14 +158,18 @@ function Stat({ icon: Icon, label, value }: { icon: any; label: string; value: s
   );
 }
 
-function ModuleNode({ module: m, unlocked, side }: { module: Module; unlocked: boolean; side: "left" | "right" }) {
+function ModuleNode({ module: m, status, side }: { module: Module; status: ProgressStatus; side: "left" | "right" }) {
+  const clickable = status !== "locked";
+  const passed = status === "passed";
+
   const inner = (
     <div className={cn(
       "group relative rounded-2xl border transition",
       m.is_capstone
         ? "border-transparent shadow-[var(--shadow-capstone)]"
         : "border-border bg-card shadow-[var(--shadow-sm)]",
-      unlocked ? "hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]" : "opacity-60",
+      clickable ? "hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]" : "opacity-60",
+      passed && "ring-1 ring-emerald-500/40",
       m.is_capstone ? "p-6" : "p-5",
     )}
     style={m.is_capstone ? { background: "var(--gradient-capstone)" } : undefined}
@@ -132,7 +179,7 @@ function ModuleNode({ module: m, unlocked, side }: { module: Module; unlocked: b
           "grid shrink-0 place-items-center rounded-xl font-bold",
           m.is_capstone ? "h-12 w-12 bg-white/20 text-white text-lg" : "h-10 w-10 bg-primary/10 text-primary",
         )}>
-          {unlocked ? m.order_in_level : <Lock className="h-4 w-4" />}
+          {passed ? <Check className="h-5 w-5 text-emerald-500" /> : clickable ? m.order_in_level : <Lock className="h-4 w-4" />}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -141,7 +188,17 @@ function ModuleNode({ module: m, unlocked, side }: { module: Module; unlocked: b
                 Capstone Project
               </span>
             )}
-            {!unlocked && !m.is_capstone && (
+            {status === "passed" && (
+              <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                Passed
+              </span>
+            )}
+            {status === "in_progress" && (
+              <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+                In progress
+              </span>
+            )}
+            {status === "locked" && !m.is_capstone && (
               <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                 Locked
               </span>
@@ -162,9 +219,12 @@ function ModuleNode({ module: m, unlocked, side }: { module: Module; unlocked: b
 
   return (
     <div className={cn("relative flex", side === "left" ? "md:justify-start md:pr-[52%]" : "md:justify-end md:pl-[52%]")}>
-      {/* node dot on center line */}
-      <div aria-hidden className="pointer-events-none absolute left-1/2 top-6 hidden h-3 w-3 -translate-x-1/2 rounded-full border-2 border-background bg-primary md:block" style={m.is_capstone ? { background: "var(--capstone)" } : undefined} />
-      {unlocked ? (
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-6 hidden h-3 w-3 -translate-x-1/2 rounded-full border-2 border-background bg-primary md:block"
+        style={m.is_capstone ? { background: "var(--capstone)" } : passed ? { background: "rgb(16 185 129)" } : undefined}
+      />
+      {clickable ? (
         <Link to="/modules/$id" params={{ id: String(m.id) }} className="block w-full">{inner}</Link>
       ) : (
         <div className="w-full cursor-not-allowed">{inner}</div>
