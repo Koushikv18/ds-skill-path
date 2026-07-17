@@ -188,7 +188,7 @@ export function SqlEditor() {
             sql_task_id: task.id,
             user_id: userId,
             query_text: query,
-            last_run_result: { rows, correct, feedback },
+            last_run_result: { rows, correct, feedback } as any,
             last_saved_at: new Date().toISOString(),
           });
         }

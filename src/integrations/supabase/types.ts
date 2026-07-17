@@ -14,6 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_log: {
+        Row: {
+          activity_type: string
+          created_at: string
+          date: string
+          id: string
+          minutes_spent: number | null
+          module_id: number | null
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string
+          date: string
+          id?: string
+          minutes_spent?: number | null
+          module_id?: number | null
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string
+          date?: string
+          id?: string
+          minutes_spent?: number | null
+          module_id?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      daily_checklist: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          date: string
+          id: string
+          item_type: string
+          label: string
+          ref_id: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          date: string
+          id?: string
+          item_type: string
+          label: string
+          ref_id?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          item_type?: string
+          label?: string
+          ref_id?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       modules: {
         Row: {
           created_at: string
@@ -65,6 +131,74 @@ export type Database = {
           display_name?: string | null
           id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      sql_sessions: {
+        Row: {
+          created_at: string
+          id: string
+          last_run_result: Json | null
+          last_saved_at: string
+          query_text: string
+          sql_task_id: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_run_result?: Json | null
+          last_saved_at?: string
+          query_text: string
+          sql_task_id?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_run_result?: Json | null
+          last_saved_at?: string
+          query_text?: string
+          sql_task_id?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sql_sessions_sql_task_id_fkey"
+            columns: ["sql_task_id"]
+            isOneToOne: false
+            referencedRelation: "sql_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sql_tasks: {
+        Row: {
+          created_at: string
+          difficulty: string
+          expected_result_rows: Json
+          id: number
+          prompt: string
+          schema_sql: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          difficulty?: string
+          expected_result_rows?: Json
+          id?: number
+          prompt: string
+          schema_sql: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          difficulty?: string
+          expected_result_rows?: Json
+          id?: number
+          prompt?: string
+          schema_sql?: string
+          title?: string
         }
         Relationships: []
       }
