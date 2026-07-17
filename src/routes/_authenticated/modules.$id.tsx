@@ -8,6 +8,13 @@ import type { Module } from "@/lib/modules";
 type ProgressStatus = "locked" | "unlocked" | "in_progress" | "passed";
 
 export const Route = createFileRoute("/_authenticated/modules/$id")({
+  head: ({ params }) => ({
+    meta: [
+      { title: `Module ${params.id} · DS Track` },
+      { name: "description", content: "A focused Data Science module inside the DS Track skill tree." },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: ModuleDetail,
 });
 

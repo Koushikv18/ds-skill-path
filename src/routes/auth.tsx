@@ -13,6 +13,13 @@ const searchSchema = z.object({ mode: z.enum(["signin", "signup"]).optional() })
 
 export const Route = createFileRoute("/auth")({
   validateSearch: searchSchema,
+  head: () => ({
+    meta: [
+      { title: "Sign in · DS Track" },
+      { name: "description", content: "Sign in or create your DS Track account to start the skill tree." },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: AuthPage,
 });
 
