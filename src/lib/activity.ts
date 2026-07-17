@@ -128,7 +128,7 @@ export async function ensureDailyChecklist(input: { userId: string; nextModuleLa
   }
 
   const inserted = await maybeInsert("daily_checklist", items);
-  return inserted ? (items as Array<{ id: string }>) : [];
+  return inserted ? (items as unknown as Array<{ id: string }>) : [];
 }
 
 export async function updateChecklistItemStatus(input: { id: string; status: "pending" | "done" }) {
