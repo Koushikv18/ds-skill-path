@@ -7,9 +7,9 @@ function getTodayKey(date = new Date()) {
   return date.toISOString().slice(0, 10);
 }
 
-async function maybeInsert(table: string, payload: Record<string, unknown>) {
+async function maybeInsert(table: string, payload: Record<string, unknown> | Record<string, unknown>[]) {
   try {
-    const { error } = await (supabase.from(table) as any).insert(payload);
+    const { error } = await (supabase.from(table as never) as any).insert(payload);
     if (error) throw error;
     return true;
   } catch (error) {
@@ -17,6 +17,7 @@ async function maybeInsert(table: string, payload: Record<string, unknown>) {
     return false;
   }
 }
+
 
 async function maybeUpdateChecklistByEvent(userId: string, itemType: ChecklistItemType, date: string, refId?: number | string | null) {
   try {
