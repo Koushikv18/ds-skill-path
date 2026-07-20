@@ -80,6 +80,33 @@ export type Database = {
         }
         Relationships: []
       }
+      github_connections: {
+        Row: {
+          access_token: string
+          created_at: string
+          github_username: string
+          repo_full_name: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          created_at?: string
+          github_username: string
+          repo_full_name?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          github_username?: string
+          repo_full_name?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       modules: {
         Row: {
           created_at: string
@@ -245,7 +272,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      disconnect_github: { Args: never; Returns: undefined }
+      get_github_connection_status: {
+        Args: never
+        Returns: {
+          connected: boolean
+          github_username: string
+          repo_full_name: string
+        }[]
+      }
+      set_github_repo: {
+        Args: { new_repo_full_name: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
