@@ -266,6 +266,10 @@ export function SqlEditor() {
               <Wand2 className="h-4 w-4" />
               {generating ? "Generating..." : "Generate new task"}
             </Button>
+            <Button onClick={pushToGithub} disabled={pushing} variant="outline" className="gap-2">
+              <Github className="h-4 w-4" />
+              {pushing ? "Pushing..." : "Push to GitHub"}
+            </Button>
             <span className="text-sm text-muted-foreground">Results are graded deterministically against the expected rows.</span>
           </div>
         </div>
