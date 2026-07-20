@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ArrowLeft, Github, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 
 const searchSchema = z.object({ mode: z.enum(["signin", "signup"]).optional() });
 
@@ -58,15 +58,6 @@ function AuthPage() {
     } finally { setLoading(false); }
   };
 
-  const handleGitHub = async () => {
-    setLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "github",
-      options: { redirectTo: `${window.location.origin}/dashboard` },
-    });
-    if (error) { toast.error(error.message); setLoading(false); return; }
-  };
-
   return (
     <div className="min-h-screen" style={{ background: "var(--gradient-hero)" }}>
       <div className="mx-auto max-w-md px-6 py-8">
@@ -87,15 +78,7 @@ function AuthPage() {
             {mode === "signup" ? "Start Module 1 in under a minute." : "Sign in to keep building."}
           </p>
 
-          <Button onClick={handleGitHub} variant="outline" className="mt-6 w-full gap-2" disabled={loading}>
-            <Github className="h-4 w-4" /> Continue with GitHub
-          </Button>
-
-          <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
-            <div className="h-px flex-1 bg-border" /> or <div className="h-px flex-1 bg-border" />
-          </div>
-
-          <form onSubmit={handleEmail} className="space-y-4">
+          <form onSubmit={handleEmail} className="mt-6 space-y-4">
             <div>
               <Label htmlFor="email">Email</Label>
               <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
