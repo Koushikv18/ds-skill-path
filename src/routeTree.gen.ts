@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedSqlPracticeRouteImport } from './routes/_authenticated/sql-practice'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedGithubCallbackRouteImport } from './routes/_authenticated/github-callback'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedModulesIdRouteImport } from './routes/_authenticated/modules.$id'
 
@@ -42,6 +43,12 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedGithubCallbackRoute =
+  AuthenticatedGithubCallbackRouteImport.update({
+    id: '/github-callback',
+    path: '/github-callback',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -57,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/github-callback': typeof AuthenticatedGithubCallbackRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/sql-practice': typeof AuthenticatedSqlPracticeRoute
   '/modules/$id': typeof AuthenticatedModulesIdRoute
@@ -65,6 +73,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/github-callback': typeof AuthenticatedGithubCallbackRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/sql-practice': typeof AuthenticatedSqlPracticeRoute
   '/modules/$id': typeof AuthenticatedModulesIdRoute
@@ -75,6 +84,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/github-callback': typeof AuthenticatedGithubCallbackRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/sql-practice': typeof AuthenticatedSqlPracticeRoute
   '/_authenticated/modules/$id': typeof AuthenticatedModulesIdRoute
@@ -85,6 +95,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/github-callback'
     | '/settings'
     | '/sql-practice'
     | '/modules/$id'
@@ -93,6 +104,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/github-callback'
     | '/settings'
     | '/sql-practice'
     | '/modules/$id'
@@ -102,6 +114,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/dashboard'
+    | '/_authenticated/github-callback'
     | '/_authenticated/settings'
     | '/_authenticated/sql-practice'
     | '/_authenticated/modules/$id'
@@ -150,6 +163,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/github-callback': {
+      id: '/_authenticated/github-callback'
+      path: '/github-callback'
+      fullPath: '/github-callback'
+      preLoaderRoute: typeof AuthenticatedGithubCallbackRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -169,6 +189,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedGithubCallbackRoute: typeof AuthenticatedGithubCallbackRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSqlPracticeRoute: typeof AuthenticatedSqlPracticeRoute
   AuthenticatedModulesIdRoute: typeof AuthenticatedModulesIdRoute
@@ -176,6 +197,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedGithubCallbackRoute: AuthenticatedGithubCallbackRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSqlPracticeRoute: AuthenticatedSqlPracticeRoute,
   AuthenticatedModulesIdRoute: AuthenticatedModulesIdRoute,

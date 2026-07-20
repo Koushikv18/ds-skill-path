@@ -7,7 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { supabase } from "@/integrations/supabase/client";
 import initSqlJs, { type Database as SqlDatabase } from "sql.js";
 import sqlWasmUrl from "sql.js/dist/sql-wasm.wasm?url";
-import { CheckCircle2, Play, Sparkles, Wand2 } from "lucide-react";
+import { CheckCircle2, Github, Play, Sparkles, Wand2 } from "lucide-react";
+import { toast } from "sonner";
 import { logActivity } from "@/lib/activity";
 
 type Task = {
