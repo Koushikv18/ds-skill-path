@@ -79,6 +79,29 @@ export function SqlEditor() {
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pushing, setPushing] = useState(false);
+
+  const pushToGithub = async () => {
+    setPushing(true);
+    try {
+      const slug = task.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "query";
+      const path = `sql-practice/${slug}.sql`;
+      const content = `-- ${task.title}\n-- ${task.prompt}\n\n${query}\n`;
+      const { data, error: fnErr } = await supabase.functions.invoke("github-push", {
+        body: { path, content, message: `SQL practice: ${task.title}` },
+      });
+      if (fnErr) throw fnErr;
+      if (data?.html_url) {
+        toast.success("Pushed to GitHub", { description: data.html_url });
+      } else {
+        toast.success("Pushed to GitHub");
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to push to GitHub");
+    } finally {
+      setPushing(false);
+    }
+  };
 
   useEffect(() => {
     let active = true;
