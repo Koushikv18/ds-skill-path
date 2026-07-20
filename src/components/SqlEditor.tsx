@@ -32,7 +32,8 @@ const FALLBACK_TASKS: Task[] = [
   {
     id: 1,
     title: "Customers with large orders",
-    prompt: "Which customers placed orders over $100? Show the customer name and total order amount.",
+    prompt:
+      "Which customers placed orders over $100? Show the customer name and total order amount.",
     difficulty: "Basic",
     schema_sql: `
       CREATE TABLE customers (id INTEGER PRIMARY KEY, name TEXT NOT NULL);
@@ -61,10 +62,15 @@ const FALLBACK_TASKS: Task[] = [
 ];
 
 function normalizeRows(rows: Array<Record<string, unknown>>) {
-  return rows.map((row) => Object.fromEntries(Object.entries(row).sort(([a], [b]) => a.localeCompare(b))));
+  return rows.map((row) =>
+    Object.fromEntries(Object.entries(row).sort(([a], [b]) => a.localeCompare(b))),
+  );
 }
 
-function compareRows(actual: Array<Record<string, unknown>>, expected: Array<Record<string, unknown>>) {
+function compareRows(
+  actual: Array<Record<string, unknown>>,
+  expected: Array<Record<string, unknown>>,
+) {
   if (actual.length !== expected.length) return false;
   const normalizedActual = normalizeRows(actual);
   const normalizedExpected = normalizeRows(expected);
@@ -73,7 +79,7 @@ function compareRows(actual: Array<Record<string, unknown>>, expected: Array<Rec
 
 export function SqlEditor() {
   const [task, setTask] = useState<Task>(FALLBACK_TASKS[0]);
-  const [query, setQuery] = useState("SELECT name, total_amount FROM (SELECT c.name, SUM(o.total_amount) AS total_amount FROM customers c JOIN orders o ON c.id = o.customer_id GROUP BY c.name) q WHERE total_amount > 100 ORDER BY total_amount DESC;");
+  const [query, setQuery] = useState("-- Write your query here\nSELECT * FROM customers LIMIT 10;");
   const [db, setDb] = useState<SqlDatabase | null>(null);
   const [result, setResult] = useState<RunResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -84,7 +90,11 @@ export function SqlEditor() {
   const pushToGithub = async () => {
     setPushing(true);
     try {
-      const slug = task.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "query";
+      const slug =
+        task.title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "") || "query";
       const path = `sql-practice/${slug}.sql`;
       const content = `-- ${task.title}\n-- ${task.prompt}\n\n${query}\n`;
       const { data, error: fnErr } = await supabase.functions.invoke("github-push", {
@@ -177,25 +187,32 @@ export function SqlEditor() {
         throw new Error("The query returned no result set.");
       }
       const data = statements[0];
-      const rows = data.values.map((values) => Object.fromEntries(data.columns.map((column, index) => [column, values[index]])));
+      const rows = data.values.map((values) =>
+        Object.fromEntries(data.columns.map((column, index) => [column, values[index]])),
+      );
       const correct = compareRows(rows, task.expected_result_rows);
 
-      let feedback = "This looks structured and readable. A senior analyst would also check that the query handles nulls or empty groups gracefully.";
+      let feedback =
+        "This looks structured and readable. A senior analyst would also check that the query handles nulls or empty groups gracefully.";
       if (correct) {
-        feedback = "The result matches the expected rows exactly. The query is a strong fit for the business question and is easy to read.";
+        feedback =
+          "The result matches the expected rows exactly. The query is a strong fit for the business question and is easy to read.";
       }
 
       try {
-        const { data: feedbackPayload, error: feedbackError } = await supabase.functions.invoke("generate-sql-task", {
-          body: {
-            mode: "feedback",
-            query,
-            schema_sql: task.schema_sql,
-            result: rows,
-            expected_result_rows: task.expected_result_rows,
-            correct,
+        const { data: feedbackPayload, error: feedbackError } = await supabase.functions.invoke(
+          "generate-sql-task",
+          {
+            body: {
+              mode: "feedback",
+              query,
+              schema_sql: task.schema_sql,
+              result: rows,
+              expected_result_rows: task.expected_result_rows,
+              correct,
+            },
           },
-        });
+        );
         if (!feedbackError && feedbackPayload?.feedback) {
           feedback = feedbackPayload.feedback;
         }
@@ -236,7 +253,10 @@ export function SqlEditor() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <CardTitle className="text-xl">SQL Practice</CardTitle>
-            <CardDescription className="mt-1">Run SQL entirely in your browser with a lightweight SQLite engine and instant feedback.</CardDescription>
+            <CardDescription className="mt-1">
+              Run SQL entirely in your browser with a lightweight SQLite engine and instant
+              feedback.
+            </CardDescription>
           </div>
           <div className="rounded-full border border-border/70 bg-muted/60 px-3 py-1 text-xs font-medium text-muted-foreground">
             {taskLabel}
@@ -262,7 +282,12 @@ export function SqlEditor() {
               <Play className="h-4 w-4" />
               {loading ? "Running..." : "Run query"}
             </Button>
-            <Button onClick={generateTask} disabled={generating} variant="outline" className="gap-2">
+            <Button
+              onClick={generateTask}
+              disabled={generating}
+              variant="outline"
+              className="gap-2"
+            >
               <Wand2 className="h-4 w-4" />
               {generating ? "Generating..." : "Generate new task"}
             </Button>
@@ -270,7 +295,9 @@ export function SqlEditor() {
               <Github className="h-4 w-4" />
               {pushing ? "Pushing..." : "Push to GitHub"}
             </Button>
-            <span className="text-sm text-muted-foreground">Results are graded deterministically against the expected rows.</span>
+            <span className="text-sm text-muted-foreground">
+              Results are graded deterministically against the expected rows.
+            </span>
           </div>
         </div>
 
@@ -285,26 +312,62 @@ export function SqlEditor() {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <div className="text-sm font-semibold">Verdict</div>
-                <div className="text-sm text-muted-foreground">Correctness is deterministic; feedback is advisory.</div>
+                <div className="text-sm text-muted-foreground">
+                  Correctness is deterministic; feedback is advisory.
+                </div>
               </div>
-              {result.correct ? <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/15 px-3 py-1 text-sm font-medium text-emerald-600"><CheckCircle2 className="h-4 w-4" /> Correct</div> : <div className="rounded-full bg-amber-500/15 px-3 py-1 text-sm font-medium text-amber-600">Needs adjustment</div>}
+              {result.correct ? (
+                <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/15 px-3 py-1 text-sm font-medium text-emerald-600">
+                  <CheckCircle2 className="h-4 w-4" /> Correct
+                </div>
+              ) : (
+                <div className="rounded-full bg-amber-500/15 px-3 py-1 text-sm font-medium text-amber-600">
+                  Needs adjustment
+                </div>
+              )}
             </div>
-            <div className="rounded-xl border border-border/70 bg-card/70 p-3 text-sm text-muted-foreground">{result.feedback}</div>
+            <div className="rounded-xl border border-border/70 bg-card/70 p-3 text-sm text-muted-foreground">
+              {result.feedback}
+            </div>
             <div className="overflow-hidden rounded-xl border border-border/70">
-              <div className="border-b border-border/70 bg-muted/50 px-3 py-2 text-sm font-medium">Result table</div>
+              <div className="border-b border-border/70 bg-muted/50 px-3 py-2 text-sm font-medium">
+                Result table
+              </div>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-border/70 text-sm">
                   <thead>
                     <tr className="bg-muted/30 text-left text-muted-foreground">
-                      {result.columns.map((column) => <th key={column} className="px-3 py-2 font-medium">{column}</th>)}
+                      {result.columns.map((column) => (
+                        <th key={column} className="px-3 py-2 font-medium">
+                          {column}
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {result.rows.length ? result.rows.map((row, index) => (
-                      <tr key={`${index}-${JSON.stringify(row)}`} className="border-t border-border/70">
-                        {result.columns.map((column) => <td key={column} className="px-3 py-2">{String(row[column] ?? "")}</td>)}
+                    {result.rows.length ? (
+                      result.rows.map((row, index) => (
+                        <tr
+                          key={`${index}-${JSON.stringify(row)}`}
+                          className="border-t border-border/70"
+                        >
+                          {result.columns.map((column) => (
+                            <td key={column} className="px-3 py-2">
+                              {String(row[column] ?? "")}
+                            </td>
+                          ))}
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td
+                          colSpan={result.columns.length}
+                          className="px-3 py-3 text-muted-foreground"
+                        >
+                          No rows returned.
+                        </td>
                       </tr>
-                    )) : <tr><td colSpan={result.columns.length} className="px-3 py-3 text-muted-foreground">No rows returned.</td></tr>}
+                    )}
                   </tbody>
                 </table>
               </div>
