@@ -44,6 +44,47 @@ export type Database = {
         }
         Relationships: []
       }
+      module_exercise_progress: {
+        Row: {
+          user_id: string
+          module_id: number
+          exercise_index: number
+          task: Json
+          passed: boolean
+          last_code: string | null
+          updated_at: string
+          created_at: string
+        }
+        Insert: {
+          user_id: string
+          module_id: number
+          exercise_index: number
+          task: Json
+          passed?: boolean
+          last_code?: string | null
+          updated_at?: string
+          created_at?: string
+        }
+        Update: {
+          user_id?: string
+          module_id?: number
+          exercise_index?: number
+          task?: Json
+          passed?: boolean
+          last_code?: string | null
+          updated_at?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_exercise_progress_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daily_checklist: {
         Row: {
           completed_at: string | null
